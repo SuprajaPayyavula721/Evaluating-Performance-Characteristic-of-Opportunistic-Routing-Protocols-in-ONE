@@ -1,0 +1,203 @@
+
+## Tsunami scenario ##
+
+
+## Scenario settings
+Scenario.name = %%Group.router%%_%%Group.bufferSize%%_%%Scenario.endTime%%
+Scenario.simulateConnections = true
+Scenario.updateInterval = 0.1
+Scenario.endTime = 43200
+
+
+# "Bluetooth" interface for all nodes
+btInterface.type = SimpleBroadcastInterface
+# Transmit speed of 2 Mbps = 250kBps
+btInterface.transmitSpeed = 250k
+btInterface.transmitRange = 15
+
+# High speed, long range, interface
+highspeedInterface.type = SimpleBroadcastInterface
+highspeedInterface.transmitSpeed = 10M
+highspeedInterface.transmitRange = 400
+
+# Define 4 different node groups
+Scenario.nrofHostGroups = 9
+
+# Group and movement model specific settings
+
+# Common settings for all groups
+Group.movementModel = ShortestPathMapBasedMovement
+Group.router = [EpidemicRouter;ProphetRouter;]
+#ProphetRouter.secondsInTimeUnit = 1
+Group.bufferSize = [5M; 5M; 15M; 15M; 25M; 25M; 35M; 35M;]
+Group.waitTime = 0, 120
+
+# Message TTL of 300 minutes (5 hours)
+Group.msgTtl = 300
+
+# All nodes have the bluetooth and highspeed interface
+Group.nrofInterfaces = 1
+Group.interface1 = btInterface
+Group.interface2 = highspeedInterface
+
+
+Group.nrofHosts = 115
+
+## Group-specific settings:
+# groupID : Group's identifier. Used as the prefix of host names
+# nrofHosts: number of hosts in the group
+# movementModel: movement model of the hosts (valid class name from movement package)
+# waitTime: minimum and maximum wait times (seconds) after reaching destination
+# speed: minimum and maximum speeds (m/s) when moving on a path
+# bufferSize: size of the message buffer (bytes)
+# router: router used to route messages (valid class name from routing package)
+# activeTimes: Time intervals when the nodes in the group are active (start1, end1, start2, end2, ...)
+# msgTtl : TTL (minutes) of the messages created by this host group, default=infinite
+
+# group1 (people near beach) specific settings (2397, 1395)1661, 2765
+Group1.groupID = p
+Group1.nrofHosts = 65
+Group1.movementModel = ClusterMovement
+Group1.interface = btInterface
+Group1.clusterCenter = 2754, 1312
+Group1.speed = 0.5, 1.5
+
+# group2 (cars) specific settings
+Group2.groupID = c
+# cars can drive only on roads
+Group2.okMaps = 1
+# 10-50 km/h
+Group2.speed = 2.5, 15
+Group2.movementModel = CarMovement
+Group2.nrofHosts = 23
+Group2.interface = highspeedInterface
+
+
+# group3 (pedestrians) spefific settings
+Group3.groupID = p
+Group3.nrofHosts = 10
+Group3.speed = 0.5, 1.5
+
+#bus 
+Group4.groupID = busB
+Group4.movementModel = BusMovement
+Group4.routeFile = data/HelsinkiMedium/A_bus.wkt
+Group4.routeType = 2
+Group4.waitTime = 10, 30
+Group4.speed = 2.7,13.9
+Group4.busControlSystemNr = 3
+Group4.nrofHosts = 6
+
+
+#TRAMS 
+Group5.groupID = tram
+Group5.movementModel = MapRouteMovement
+Group5.routeFile = data/tram3.wkt
+Group5.routeType = 1
+Group5.waitTime = 10, 30
+Group5.speed = 7, 10
+Group5.nrofHosts = 2
+
+Group6.groupID = tram
+Group6.movementModel = MapRouteMovement
+Group6.routeFile = data/tram4.wkt
+Group6.routeType = 2
+Group6.waitTime = 10, 30
+Group6.speed = 7, 10
+Group6.nrofHosts = 2
+
+# ambulance 
+Group7.groupID = a
+Group7.bufferSize = 120M
+Group7.waitTime = 10,30
+Group7.speed = 1, 2
+Group7.nrofHosts = 5
+Group7.interface = highspeedInterface
+
+# group8 (rescue station) specific settings
+Group8.groupID = rs1
+Group8.movementModel = StationaryMovement
+Group8.nodeLocation = 1842, 1256
+Group8.nrofHosts = 1
+#Group8.bufferSize = 1G
+Group8.interface = highspeedInterface
+
+# group9 (rescue station) specific settings
+Group9.groupID = rs2
+Group9.movementModel = StationaryMovement
+Group9.nodeLocation = 2323, 1180
+Group9.nrofHosts = 1
+#Group9.bufferSize = 1G
+Group9.interface = highspeedInterface
+
+
+
+## Message creation parameters 
+# How many event generators
+Events.nrof = 1
+# Class of the first event generator
+Events1.class = MessageEventGenerator
+
+Events1.interval = 25,35
+# Message sizes (500kB - 1MB)
+Events1.size = 500k,1M
+# range of message source/destination addresses
+
+# Source of the emergency call
+Events1.hosts = 0,6
+
+# Destination is the rescue station
+Events1.tohosts = 7, 10
+
+# Message ID prefix
+Events1.prefix = M
+
+
+## Movement model settings
+# seed for movement models' pseudo random number generator (default = 0)
+MovementModel.rngSeed = 1
+# World's size for Movement Models without implicit size (width, height; meters)
+MovementModel.worldSize = 4500, 3400
+# How long time to move hosts in the world before real simulation
+MovementModel.warmup = 1000
+
+## Map based movement -movement model specific settings
+MapBasedMovement.nrofMapFiles = 4
+
+MapBasedMovement.mapFile1 = data/roads.wkt
+MapBasedMovement.mapFile2 = data/main_roads.wkt
+MapBasedMovement.mapFile3 = data/pedestrian_paths.wkt
+MapBasedMovement.mapFile4 = data/shops.wkt
+
+## Reports - all report names have to be valid report classes
+
+# how many reports to load
+Report.nrofReports = 1
+# length of the warm up period (simulated seconds)
+Report.warmup = 0
+# default directory of reports (can be overridden per Report with output setting)
+Report.reportDir = [Reports/Tsunami_epi; Reports/Tsunami_Prop;]
+# Report classes to load
+Report.report1 = MessageStatsReport
+
+## Optimization settings -- these affect the speed of the simulation
+## see World class for details.
+Optimization.cellSizeMult = 5
+Optimization.randomizeUpdateOrder = true
+
+
+## GUI settings
+
+# GUI underlay image settings
+GUI.UnderlayImage.fileName = data/helsinki_underlay.png
+# Image offset in pixels (x, y)
+GUI.UnderlayImage.offset = 64, 20
+# Scaling factor for the image
+GUI.UnderlayImage.scale = 4.75
+# Image rotation (radians)
+GUI.UnderlayImage.rotate = -0.015
+
+# how many events to show in the log panel (default = 30)
+GUI.EventLogPanel.nrofEvents = 100
+# Regular Expression log filter (see Pattern-class from the Java API for RE-matching details)
+#GUI.EventLogPanel.REfilter = .*p[1-9]<->p[1-9]$
